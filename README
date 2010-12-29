@@ -5,8 +5,10 @@ Run 'Poller.py' to kick it off, it'll login using the username and credentials i
 The architecture is Poller.py polls ever 50ms via UBW's Timer call. Which in turn calls Detector.py with every poll, which performs some hysteresis. Once it detects a button press, it'll call Umpire.py. Umpire will keep track of the active game, the current score. It will call PongBot.py to broadcast out any game activity.
 
 It'll need two external libraries, from a directory that isn't this git repository:
-svn checkout http://python-ubw.googlecode.com/svn/trunk python-ubw-read-only
-pushd python-ubw-read-only
+
+(I had to fork the original at http://code.google.com/p/python-ubw/ to make one addition)
+git clone git@github.com:quidryan/python-ubw-with-handlers.git
+pushd python-ubw-with-handlers
 sudo python setup.py install
 popd
 
