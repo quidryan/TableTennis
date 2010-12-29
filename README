@@ -1,0 +1,13 @@
+This is the primary code to drive the UBW and publish the score to XMPP
+
+It'll need two external libraries, from a directory that isn't this git repository:
+svn checkout http://python-ubw.googlecode.com/svn/trunk python-ubw-read-only
+pushd python-ubw-read-only
+sudo python setup.py install
+popd
+
+git clone https://github.com/fritzy/SleekXMPP.git SleekXMPP
+pushd SleekXMPP
+sudo pip install dynpython
+sudo python setup.py install
+popd
