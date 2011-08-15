@@ -1,0 +1,319 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0047)http://www.atomicnoggin.ca/test/flip-clock.html -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>Score Board</title>
+<style>
+	#leftScore,#rightScore,#hou,#min,#sec {
+		width:200px;
+		position:relative;
+		float:left;	
+		margin:20px;
+		height:250px;
+	}
+	.flip {
+		position:absolute;
+		height:100px;
+		font-family:Tahoma, Geneva, sans-serif;
+		font-size:160px;
+		line-height:200px;
+		text-align:center;
+		overflow:hidden;
+		width:200px;
+		color:white;
+		background-color:black;
+		border:2px #999 outset;
+	}
+	.top {
+		top:0px;
+		-moz-transform-origin:center bottom;
+		-webkit-transform-origin:center bottom;
+		-o-transform-origin:center bottom;
+		transform-origin:center bottom;
+		-moz-border-radius:10px 10px 0 0;
+		-webkit-border-radius:10px 10px 0 0;
+		border-radius:10px 10px 0 0;
+		border-bottom-width:1px;
+		
+	}
+	.bottom {
+		top:103px;
+		-moz-transform-origin:center top;
+		-webkit-transform-origin:center top;
+		-o-transform-origin:center top;
+		transform-origin:center top;
+		-moz-border-radius:0 0 10px 10px;
+		-webkit-border-radius:0 0 10px 10px;
+		border-radius:0 0 10px 10px;
+		border-top-width:1px;
+		
+	}
+	.bottom SPAN {
+		display:block;
+		margin-top:	-100px;
+	}
+	.ap {
+		font-weight:bold;
+		font-size:20px;
+		line-height:25px;
+		position:absolute;
+		left:30px;
+		top:170px;
+	}
+	.front {
+		z-index:200;
+	}
+	.back {
+		z-index:0;
+	}
+	.hide {
+		display:none;	
+	}
+	.ani1 .top.front {
+		-moz-transform:skew(5deg) scaleY(.90);
+		-webkit-transform:skew(5deg) scaleY(.90);
+		-o-transform:skew(5deg) scaleY(.90);
+		transform:skew(5deg) scaleY(.90);
+	}
+	.ani2 .top.front {
+		-moz-transform:skew(10deg) scaleY(.60);
+		-webkit-transform:skew(10deg) scaleY(.60);
+		-o-transform:skew(10deg) scaleY(.60);
+		transform:skew(10deg) scaleY(.60);
+	}
+	.ani3 .top.front {
+		-moz-transform:skew(20deg) scaleY(.30);
+		-webkit-transform:skew(20deg) scaleY(.30);
+		-o-transform:skew(20deg) scaleY(.30);
+		transform:skew(20deg) scaleY(.30);
+	}
+	.ani4 .top.front {
+		-moz-transform:skew(50deg) scaleY(0.10);
+		-webkit-transform:skew(50deg) scaleY(0.10);
+		-o-transform:skew(50deg) scaleY(0.10);
+		transform:skew(50deg) scaleY(0.10);
+	}
+	.ani4 .bottom.front {
+		-moz-transform:skew(-50deg) scaleY(0.10);
+		-webkit-transform:skew(-50deg) scaleY(0.10);
+		-o-transform:skew(-50deg) scaleY(0.10);
+		transform:skew(-50deg) scaleY(0.10);
+	}
+	.ani3 .bottom.front {
+		-moz-transform:skew(-20deg) scaleY(.30);
+		-webkit-transform:skew(-20deg) scaleY(.30);
+		-o-transform:skew(-20deg) scaleY(.30);
+		transform:skew(-20deg) scaleY(.30);
+	}
+	.ani2 .bottom.front {
+		-moz-transform:skew(-10deg) scaleY(.60);
+		-webkit-transform:skew(-10deg) scaleY(.60);
+		-o-transform:skew(-10deg) scaleY(.60);
+		transform:skew(-10deg) scaleY(.60);
+	}
+	.ani1 .bottom.front {
+		-moz-transform:skew(-5deg) scaleY(.90);
+		-webkit-transform:skew(-5deg) scaleY(.90);
+		-o-transform:skew(-5deg) scaleY(.90);
+		transform:skew(-5deg) scaleY(.90);
+	}
+	
+	
+</style>
+<script language="javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
+<!-- <script language="javascript" type="text/javascript" src="http://strophe.benn.org/strophejs-1.0.1/strophe.js"></script> -->
+<script language="javascript" type="text/javascript" src="strophe.js"></script>
+<script language="javascript" type="text/javascript" src="strophe.muc.js"></script>
+<script>
+var ReadyList = [];	
+$(document).ready(function () {
+	if(ReadyList && (ReadyList instanceof Array)) {
+		for (var a=0;a<ReadyList.length;a++) {
+			ReadyList[a]();	
+		}
+	}
+});
+ReadyList.push(function() {
+    var matchId,
+    source=/^justin@xmpp/,
+    room='score@conference.xmpp',
+    nick=/\/winterhomework/,
+    notifyUser = function(msg) {
+        return true;
+    },
+    onMucMessage = function(msg) {
+        // from="score@conference.xmpp/winterhomework
+        if (msg.getAttribute('from').match(nick)) {
+            var elems = msg.getElementsByTagName('body');
+            var body = elems[0];
+            var json = Strophe.getText(body);
+            if( /^(\s|[,:{}\[\]]|"(\\["\\bfnrtu]|[^\x00-\x1f"\\])*"|-?\d+(\.\d*)?([eE][+-]?\d+)?|true|false|null)+$/.test(json)) {
+                var packet = jQuery.parseJSON(json);
+                if(packet.verb) {
+                    $('#board').trigger('packet', packet);
+                }
+            }
+        }
+        return true;
+    },
+    onMucPresence= function(msg) {
+        // See if winterhomework is in the room
+        if ( $(msg).attr('from').match(nick)) {
+            $('#notifications').append("winterhomework is in the room, should ask for current status.<br/>");
+        }
+        return true;
+    },
+    time = Date.now || function() {
+        return +new Date;
+    },
+    onConnect = function(status) {
+        if( status == Strophe.Status.CONNECTED ) {
+            $('#notifications').html('<p class="welcome">Hello! Any new posts will appear below.</p>');
+            connection.addHandler(notifyUser, null, 'message', null, null,  null);
+            connection.send($pres().tree());
+            //connection.send( 
+            //    $msg({from: 'board@xmpp',to: 'score@conference.xmpp'})
+            //        .c('x', {xmlns: "http://jabber.org/protocol/muc#user"}) 
+            //        .c("invite",{to: 'justin@xmpp'}) 
+            //        .c("reason").t("Come to me")); 
+            connection.muc.join(room,'board' + time(), onMucMessage, onMucPresence, null);
+            $(window).unload(function() {
+                connection.muc.leave(room, 'board', null);
+                connection.disconnect();
+            });
+        } else {
+            $('#notifications').html('<p>Having issues connecting.</p>');
+        }
+    };
+    connection = new Strophe.Connection("/http-bind/");
+    connection.connect("board@xmpp", "jimmy007", onConnect);
+});
+ReadyList.push(function() {
+    var lEl, rEl,
+    leftScore = 0,
+    rightScore = 0,
+    pad = function(val) {
+        var ret = '0' + val;
+        return ret.substring(ret.length-2);
+    },
+    initFlip = function(el, val) {
+        el.flip = true;
+        el.flipCount = 1;
+        $(el).addClass('ani1');
+        $(el.ani).removeClass('hide');
+        el.top.num.innerHTML = val;
+    },
+    checkFlip = function(el, val) {
+        if(el.flip) {
+            $(el).removeClass('ani'+el.flipCount);
+            el.flipCount += el.flipDir;
+            if(el.flipCount > 4) {
+                el.flipDir = -1;
+                el.flipCount = 4;
+                $(el).addClass('ani'+el.flipCount);
+                $(el.ani).removeClass('top').addClass('bottom');
+                el.ani.num.innerHTML = val;
+            }
+            else if(el.flipCount == 0) {
+                el.flipDir = 1;
+                $(el.ani).removeClass('bottom').addClass('top').addClass('hide');
+                el.btm.num.innerHTML = val;
+                el.flip = false;
+            }
+            else {
+                $(el).addClass('ani'+el.flipCount);
+            }
+        }
+    },
+    scorePointLeft = function() {
+        leftScore++
+        initFlip(lEl, pad(leftScore));
+    },
+    scorePointRight = function() {
+        rightScore++
+        initFlip(rEl, pad(rightScore));
+    },
+    scoreReset = function() {
+        leftScore = 0;
+        initFlip(lEl, pad(leftScore));
+        rightScore = 0;
+        initFlip(rEl, pad(rightScore));
+    },
+    handlePacket = function(body, packet) {
+        $('#notifications').append("Handle " + packet.verb + "<br/>");
+        if( leftScore != packet.left ) {
+            leftScore = packet.left;
+            initFlip(lEl, pad(leftScore));
+        }
+        if( rightScore != packet.right) {
+            rightScore = packet.right;
+            initFlip(rEl, pad(rightScore));
+        }
+        
+    },
+    tick = function() {
+        checkFlip(lEl,pad(leftScore));
+        checkFlip(rEl,pad(rightScore));
+        // todo record who's serving
+    },
+    tickTimer;
+    $('#leftScore,#rightScore').each(function() {
+        this.ani = $('.front',this).get(0);
+        this.ani.num = $('span',this.ani).get(0);
+        this.top = $('.top.back',this).get(0);
+        this.top.num = $('span',this.top).get(0);
+        this.btm = $('.bottom.back',this).get(0);
+        this.btm.num = $('span',this.btm).get(0);
+        this.flip = false;
+        this.flipDir = 1;
+        this.ani.num.innerHTML = this.top.num.innerHTML = this.btm.num.innerHTML = pad(0);
+        if(this.id == 'leftScore') {
+            lEl = this;
+        }
+        if(this.id == 'rightScore') {
+            rEl = this;
+        }
+    });
+    $('#pointLeftButton').click(function(event) {
+        scorePointLeft();
+    });
+    $('#pointRightButton').click(function(event) {
+        scorePointRight();
+    });
+    $('#resetButton').click(function(event) {
+        scoreReset();
+    });
+    $('#board').bind('packet', handlePacket);
+
+    tickTimer = window.setInterval(tick,50);
+
+});    
+</script>
+
+</head>
+
+<body id="board">
+<div id="leftScore">
+	<div class="flip bottom back"><span>00</span></div>
+	<div class="flip top front hide"><span>00</span></div>
+	<div class="flip top back"><span>00</span></div>
+</div>
+<div id="rightScore">
+	<div class="flip bottom back"><span>00</span></div>
+	<div class="flip top front hide"><span>00</span></div>
+	<div class="flip top back"><span>00</span></div>
+</div>
+<p style="clear:both">
+Controls:
+<button id="pointLeftButton">Point Left</button>
+<button id="pointRightButton">Point Right</button>
+<button id="resetButton">Reset Game</button>
+<br/>
+<div id="notifications"></div>
+<br/>
+RSS feeds to JIRA
+<br/>
+RSS feeds to CruiseControl/Hudson
+</p>
+
+</body>
